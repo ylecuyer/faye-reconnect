@@ -21,7 +21,6 @@ Gem::Specification.new do |spec|
   spec.add_runtime_dependency 'em-hiredis', '~> 0.3'
 
   spec.add_development_dependency 'bundler', '~> 1.7'
-  spec.add_development_dependency 'faye', '~> 1.0.3'
   spec.add_development_dependency 'rake', '~> 10.0'
   spec.add_development_dependency 'rspec', '~> 3.1.0'
   spec.add_development_dependency 'rspec-eventmachine', '~> 0.2.0'
