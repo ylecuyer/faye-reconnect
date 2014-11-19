@@ -1,7 +1,7 @@
 require "faye/reconnect/version"
+require "faye/reconnect/extension"
 
 module Faye
   module Reconnect
-    # Your code goes here...
   end
 end

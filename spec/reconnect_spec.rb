@@ -8,6 +8,7 @@ ReconnectSteps = RSpec::EM.async_steps do
     @clients ||= {}
     @inboxes ||= {}
     @clients[name] = Faye::Client.new('http://localhost:9876/faye')
+    @clients[name].add_extension(Faye::Reconnect::Extension.new(name: name, redis: {database: 9}))
     @inboxes[name] = {}
 
     n = channels.size
@@ -39,6 +40,7 @@ ReconnectSteps = RSpec::EM.async_steps do
   def kill_client(name, &callback)
     client = @clients[name]
     @clients.delete(name)
+    @inboxes.delete(name)
     client.instance_variable_get(:@dispatcher).close
     client.instance_variable_set(:@state, Faye::Client::DISCONNECTED)
     EM.add_timer(0.1, &callback)
@@ -47,7 +49,12 @@ ReconnectSteps = RSpec::EM.async_steps do
   def flushdb(&callback)
     @clients = {}
     @inboxes = {}
-    callback.call
+    @redis = EventMachine::Hiredis::Client.new('localhost', 6379, '', 9)
+    @redis.connect
+    @redis.errback do |reason|
+      raise "Connection to redis failed : #{reason}"
+    end
+    @redis.flushdb(&callback)
   end
 
   def launch_server(&callback)
@@ -66,6 +73,10 @@ ReconnectSteps = RSpec::EM.async_steps do
     EM.add_timer(0.1, &callback)
   end
 
+  def wait(time, &callback)
+    EM.add_timer(time, &callback)
+  end
+
 end
 
 describe Faye::Reconnect do
@@ -76,10 +87,11 @@ describe Faye::Reconnect do
 
   it 'fetches messages sent while disconnected' do
     client 'foo', ['/foo']
-    client 'bar', []
+    client 'bar', ['/bar']
     kill_client 'foo'
-    publish 'bar', 'foo', {'hello' => 'world'}
+    publish 'bar', '/foo', {'hello' => 'world'}
     client 'foo', ['/foo']
+    wait 0.2
     check_inbox 'foo', '/foo', [{'hello' => 'world'}]
   end
 
