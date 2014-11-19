@@ -23,6 +23,9 @@ ReconnectSteps = RSpec::EM.async_steps do
         n -= 1
         callback.call if n.zero?
       end
+      subscription.errback do |e|
+        raise e.to_s
+      end
     end
   end
 
@@ -43,6 +46,14 @@ ReconnectSteps = RSpec::EM.async_steps do
     @inboxes.delete(name)
     client.instance_variable_get(:@dispatcher).close
     client.instance_variable_set(:@state, Faye::Client::DISCONNECTED)
+    EM.add_timer(0.1, &callback)
+  end
+
+  def disconnect_client(name, &callback)
+    client = @clients[name]
+    @clients.delete(name)
+    @inboxes.delete(name)
+    client.disconnect
     EM.add_timer(0.1, &callback)
   end
 
@@ -93,6 +104,31 @@ describe Faye::Reconnect do
     client 'foo', ['/foo']
     wait 0.2
     check_inbox 'foo', '/foo', [{'hello' => 'world'}]
+  end
+
+  it 'does not re-use clientId when issuing a legal disconnect' do
+    client 'foo', ['/foo']
+    client 'bar', ['/bar']
+    disconnect_client 'foo'
+    publish 'bar', '/foo', {'hello' => 'world'}
+    client 'foo', ['/foo']
+    wait 0.2
+    check_inbox 'foo', '/foo', []
+  end
+
+  it 'is scoped by name' do
+    client 'foo', ['/foo']
+    client 'baz', ['/baz']
+    client 'bar', ['/bar']
+    kill_client 'foo'
+    kill_client 'baz'
+    publish 'bar', '/foo', {'hello' => 'foo'}
+    publish 'bar', '/baz', {'hello' => 'baz'}
+    client 'foo', ['/foo']
+    client 'baz', ['/baz']
+    wait 0.2
+    check_inbox 'foo', '/foo', [{'hello' => 'foo'}]
+    check_inbox 'baz', '/baz', [{'hello' => 'baz'}]
   end
 
 end

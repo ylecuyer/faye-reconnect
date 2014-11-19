@@ -40,11 +40,23 @@ module Faye
         @redis.set(clientIdKey, value, &callback)
       end
 
+      def del_client_id(&callback)
+        @redis.del(clientIdKey, &callback)
+      end
+
+      def outgoing(message, callback)
+        if message['channel'] == '/meta/disconnect'
+          del_client_id { callback.call(message) }
+        else
+          callback.call(message)
+        end
+      end
+
       def incoming(message, callback)
         if message['channel'] == '/meta/handshake'
           fetch_client_id do |clientId|
             if clientId.nil?
-             set_client_id(message['clientId']) { callback.call(message) }
+              set_client_id(message['clientId']) { callback.call(message) }
             else
               message['clientId'] = clientId
               callback.call(message)
