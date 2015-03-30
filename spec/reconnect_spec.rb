@@ -44,8 +44,7 @@ ReconnectSteps = RSpec::EM.async_steps do
     client = @clients[name]
     @clients.delete(name)
     @inboxes.delete(name)
-    client.instance_variable_get(:@dispatcher).close
-    client.instance_variable_set(:@state, Faye::Client::DISCONNECTED)
+    client.stop
     EM.add_timer(0.1, &callback)
   end
 
