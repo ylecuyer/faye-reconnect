@@ -12,7 +12,20 @@ module Faye
       true
     end
 
+    def reconnect(&block)
+      @reconnect_callback = block
+      connect
+    end
+
+    def receive_message(message)
+      res = super(message)
+      if @reconnect_callback && message['channel'] == '/meta/connect' && message.has_key?('successful')
+        @reconnect_callback.call
+      end
+      res
+    end
+
   end
 end
 
-Faye::Client.send(:include, Faye::Patches)
+Faye::Client.send(:prepend, Faye::Patches)

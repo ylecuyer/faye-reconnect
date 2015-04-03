@@ -1,5 +1,6 @@
 require "faye/reconnect/version"
-require "faye/reconnect/extension"
+require "faye/reconnect/client_extension"
+require "faye/reconnect/server_extension"
 require "faye/patches/client"
 
 module Faye

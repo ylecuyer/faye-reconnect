@@ -8,7 +8,7 @@ ReconnectSteps = RSpec::EM.async_steps do
     @clients ||= {}
     @inboxes ||= {}
     @clients[name] = Faye::Client.new('http://localhost:9876/faye')
-    @clients[name].add_extension(Faye::Reconnect::Extension.new(name: name, redis: {database: 9}))
+    @clients[name].add_extension(Faye::Reconnect::ClientExtension.new(name: name, redis: {database: 9}))
     @inboxes[name] = {}
 
     n = channels.size
@@ -70,6 +70,7 @@ ReconnectSteps = RSpec::EM.async_steps do
   def launch_server(&callback)
     Faye::WebSocket.load_adapter('thin')
     app = Faye::RackAdapter.new(:mount => '/faye', :timeout => 25)
+    app.add_extension(Faye::Reconnect::ServerExtension.new(app))
     Thin::Logging.silent = true
     @server = Thin::Server.new('127.0.0.1', 9876, app)
     @server.start

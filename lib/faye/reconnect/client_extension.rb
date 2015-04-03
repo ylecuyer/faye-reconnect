@@ -2,7 +2,7 @@ require 'em-hiredis'
 
 module Faye
   module Reconnect
-    class Extension
+    class ClientExtension
 
       def initialize(options)
         @name = options[:name]
@@ -47,6 +47,11 @@ module Faye
       def outgoing(message, callback)
         if message['channel'] == '/meta/disconnect'
           del_client_id { callback.call(message) }
+        elsif message['channel'] == '/meta/handshake'
+          fetch_client_id do |clientId|
+            message['previousClientId'] = clientId if !clientId.nil?
+            callback.call(message)
+          end
         else
           callback.call(message)
         end
@@ -54,12 +59,17 @@ module Faye
 
       def incoming(message, callback)
         if message['channel'] == '/meta/handshake'
-          fetch_client_id do |clientId|
-            if clientId.nil?
-              set_client_id(message['clientId']) { callback.call(message) }
-            else
-              message['clientId'] = clientId
-              callback.call(message)
+          if message['error'] == 'Already connected' && message.key?('clientId')
+            message.delete('error')
+            message['successful'] = true
+            callback.call(message)
+          else
+            fetch_client_id do |clientId|
+              if clientId.nil?
+                set_client_id(message['clientId']) { callback.call(message) }
+              else
+                callback.call(message)
+              end
             end
           end
         else
