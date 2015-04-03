@@ -1,6 +1,7 @@
 require 'faye'
 require 'faye/reconnect'
 require 'rspec/em'
+require 'spec_helper'
 
 ReconnectSteps = RSpec::EM.async_steps do
 

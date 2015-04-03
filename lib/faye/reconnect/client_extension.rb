@@ -4,11 +4,11 @@ module Faye
   module Reconnect
     class ClientExtension
 
-      def initialize(options)
-        @name = options[:name]
+      def initialize redis: nil, name:
+        @name = name
         @clientId = nil
         @clientIdFetched = false
-        redis = options[:redis] || {}
+        redis ||= {}
         redis[:host] ||= 'localhost'
         redis[:port] ||= 6379
         redis[:password] ||= ''
