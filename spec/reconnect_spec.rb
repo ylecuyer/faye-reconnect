@@ -45,7 +45,7 @@ ReconnectSteps = RSpec::EM.async_steps do
     client = @clients[name]
     @clients.delete(name)
     @inboxes.delete(name)
-    client.stop
+    client.stop!
     EM.add_timer(0.1, &callback)
   end
 
