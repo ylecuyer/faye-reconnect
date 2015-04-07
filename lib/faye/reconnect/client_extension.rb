@@ -35,11 +35,11 @@ module Faye
       end
 
       def set_client_id(value, &callback)
-        @redis.set(clientIdKey, value, &callback)
+        @redis.set(clientIdKey, value, &callback).errback(&callback)
       end
 
       def del_client_id(&callback)
-        @redis.del(clientIdKey, &callback)
+        @redis.del(clientIdKey, &callback).errback(&callback)
       end
 
       def outgoing(message, callback)
