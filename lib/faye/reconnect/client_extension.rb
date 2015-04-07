@@ -6,7 +6,6 @@ module Faye
 
       def initialize redis: nil, name:
         @name = name
-        @clientId = nil
         @clientIdFetched = false
         redis ||= {}
         redis[:host] ||= 'localhost'
@@ -27,7 +26,6 @@ module Faye
       end
 
       def fetch_client_id(&callback)
-        return callback.call(@clientId) if @clientId
         if @clientIdFetched == false
           @clientIdFetched = true
           @redis.get(clientIdKey, &callback)
