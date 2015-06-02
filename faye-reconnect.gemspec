@@ -8,8 +8,8 @@ Gem::Specification.new do |spec|
   spec.version       = Faye::Reconnect::VERSION
   spec.authors       = ["Adrien Siami"]
   spec.email         = ["adrien.siami@dimelo.com"]
-  spec.summary       = %q{TODO: Write a short summary. Required.}
-  spec.description   = %q{TODO: Write a longer description. Optional.}
+  spec.summary       = "Allow a long running faye client to reconnect to a faye server with the same client ID"
+  spec.description   = "Allow a long running faye client to reconnect to a faye server with the same client ID"
   spec.homepage      = ""
   spec.license       = "MIT"
 
