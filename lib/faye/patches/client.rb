@@ -2,7 +2,6 @@ module Faye
   module Patches
 
     def stop!
-      return unless @state == Faye::Client::CONNECTED
       @state = Faye::Client::DISCONNECTED
 
       info('Disconnecting ?', @dispatcher.client_id)
