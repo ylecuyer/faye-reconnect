@@ -8,6 +8,7 @@ module Faye
       @dispatcher.close
       info('Clearing channel listeners for ?', @dispatcher.client_id)
       @channels = Channel::Set.new
+      @response_callbacks = {}
       true
     end
 
