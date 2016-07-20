@@ -4,9 +4,10 @@ module Faye
   module Reconnect
     class ClientExtension
 
-      def initialize redis: nil, name:
+      def initialize redis: nil, name:, on_handshake: nil
         @name = name
         @clientIdFetched = false
+        @on_handshake = on_handshake
         redis ||= {}
         redis[:host] ||= 'localhost'
         redis[:port] ||= 6379
@@ -48,6 +49,8 @@ module Faye
         elsif message['channel'] == '/meta/handshake'
           fetch_client_id do |clientId|
             message['previousClientId'] = clientId if !clientId.nil?
+            # Store the clientId sent with the /meta/handshake
+            @sent_client_id = clientId
             callback.call(message)
           end
         else
@@ -57,6 +60,7 @@ module Faye
 
       def incoming(message, callback)
         if message['channel'] == '/meta/handshake'
+          @on_handshake&.call(previous_client_id: @sent_client_id, new_client_id: message['clientId'])
           if message['error'] == 'Already connected' && message.key?('clientId')
             message.delete('error')
             message['successful'] = true
