@@ -16,6 +16,7 @@ module Faye
         @redis = EventMachine::Hiredis::Client.new(redis[:host], redis[:port], redis[:password], redis[:database])
         EM.schedule do
           @redis.connect
+          @redis.client('setname', "faye-reconnect/#{name}[#{Socket.gethostname}][#{Process.pid}]")
           @redis.errback do |reason|
             raise "Connection to redis failed : #{reason}"
           end
