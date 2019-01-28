@@ -4,6 +4,10 @@ module Faye
   module Reconnect
     class ClientExtension
 
+      def self.finalize(redis)
+        proc { redis&.close_connection }
+      end
+
       def initialize redis: nil, name:, on_handshake: nil
         @name = name
         @clientIdFetched = false
@@ -17,6 +21,7 @@ module Faye
         EM.schedule do
           @redis.connect
           @redis.client('setname', "faye-reconnect/#{name}[#{Socket.gethostname}][#{Process.pid}]")
+          ObjectSpace.define_finalizer(self, self.class.finalize(@redis))
           @redis.errback do |reason|
             raise "Connection to redis failed : #{reason}"
           end
