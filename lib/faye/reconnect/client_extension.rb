@@ -32,6 +32,10 @@ module Faye
         "#{@name}/client_id"
       end
 
+      def close_redis_connection
+        @redis&.close_connection
+      end
+
       def fetch_client_id(&callback)
         if @clientIdFetched == false
           @clientIdFetched = true

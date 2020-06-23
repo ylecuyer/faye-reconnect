@@ -39,7 +39,7 @@ server.add_extension Faye::Reconnect::ServerExtension.new(server)
 
 ### Client Side
 
-The client extension has a dependency on redis. 
+The client extension has a dependency on redis.
 It uses redis to persist the client id after each successful handshake so it can re-use it when trying to reconnect.
 
 Add the extension to your faye client :
@@ -66,7 +66,7 @@ If you don't specify redis options, the ones provided in the above example will 
 You may already have something along the lines of :
 
 ```ruby
-trap('TERM') do 
+trap('TERM') do
     client.disconnect
 end
 ```
@@ -74,7 +74,7 @@ end
 If you plan on reconnecting with the same client id and get missing messages, you have to use the ``stop!`` method provided by this gem :
 
 ```ruby
-trap('TERM') do 
+trap('TERM') do
     client.stop!
 end
 ```
@@ -84,7 +84,7 @@ Instead of sending a ``/meta/disconnect`` message to the server, it will cleanly
 
 ## Contributing
 
-1. Fork it ( https://github.com/dimelo/faye-reconnect/fork )
+1. Fork it (https://github.com/jarthod/faye-reconnect/fork)
 2. Create your feature branch (`git checkout -b my-new-feature`)
 3. Commit your changes (`git commit -am 'Add some feature'`)
 4. Push to the branch (`git push origin my-new-feature`)
